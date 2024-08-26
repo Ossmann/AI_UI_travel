@@ -36,6 +36,11 @@ export function ChatPanel({
 
   const exampleMessages = [
     {
+      heading: 'What are possible flights',
+      subheading: 'from the Gold Coast to Austria?',
+      message: `What are the available flights from the Gold Coast to Vienna?`
+    },
+    {
       heading: 'What are the',
       subheading: 'trending memecoins today?',
       message: `What are the trending memecoins today?`

@@ -25,6 +25,8 @@ import { Events } from '@/components/stocks/events'
 import { StocksSkeleton } from '@/components/stocks/stocks-skeleton'
 import { Stocks } from '@/components/stocks/stocks'
 import { StockSkeleton } from '@/components/stocks/stock-skeleton'
+import { FlightsSkeleton } from '@/components/travel/flights-skeleton'
+import { Flights } from '@/components/travel/flights'
 import {
   formatNumber,
   runAsyncFnWithoutBlocking,
@@ -130,17 +132,22 @@ async function submitUserMessage(content: string) {
     model: openai('gpt-3.5-turbo'),
     initial: <SpinnerMessage />,
     system: `\
-    You are a stock trading conversation bot and you can help users buy stocks, step by step.
-    You and the user can discuss stock prices and the user can adjust the amount of stocks they want to buy, or place an order, in the UI.
+    You are a stock trading conversation bot, and a travel planning assistant.
+    You and the user can discuss stock prices or travel planes by plane and the user can adjust the amount of stocks they want to buy, or place an order, in the UI or list their flights, purchase a ticket, get regulation on what to bring to a country, or get info on related services like travel-insurance or rental car. 
     
     Messages inside [] means that it's a UI element or a user event. For example:
     - "[Price of AAPL = 100]" means that an interface of the stock price of AAPL is shown to the user.
     - "[User has changed the amount of AAPL to 10]" means that the user has changed the amount of AAPL to 10 in the UI.
+    - "[Date of flight = 01.12.2024 ]" means that an interface of the flight data of the users flight is shown.
+    - "[User has changed the date to 12.02.2025]" means that the user has changed the date of his flight to 12.02.2025 in the UI.
+
+
     
     If the user requests purchasing a stock, call \`show_stock_purchase_ui\` to show the purchase UI.
     If the user just wants the price, call \`show_stock_price\` to show the price.
     If you want to show trending stocks, call \`list_stocks\`.
     If you want to show events, call \`get_events\`.
+    If the user requests to lists his flights, call \`list_flights\`.
     If the user wants to sell stock, or complete another impossible task, respond that you are a demo and cannot do that.
     
     Besides that, you can also chat with users and do some calculations if needed.`,
@@ -177,6 +184,69 @@ async function submitUserMessage(content: string) {
       return textNode
     },
     tools: {
+      listFlights: {
+        description: 'List three imaginary flights from Gold Coast OOL to Vienna VIE.',
+        parameters: z.object({
+          flights: z.array(
+            z.object({
+              airportCodeDeparture: z.string().describe('The airport where the flight departs, for example OOL'),
+              airportCodeArrival: z.string().describe('The airport where the flight departs, for example OOL'),
+              price: z.number().describe('The price of the flight'),
+              flightNumber: z.string().describe('The flight number of the flight.'),
+              airline: z.string().describe('The airline that operates the flight.'),
+              ticketPrice: z.number().describe('Price of the flight ticket.')
+            })
+          )
+        }),
+        generate: async function* ({ flights }) {
+          yield (
+            <BotCard>
+              <FlightsSkeleton />
+            </BotCard>
+          )
+
+          await sleep(1000)
+
+          const toolCallId = nanoid()
+
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'assistant',
+                content: [
+                  {
+                    type: 'tool-call',
+                    toolName: 'listFlights',
+                    toolCallId,
+                    args: { flights }
+                  }
+                ]
+              },
+              {
+                id: nanoid(),
+                role: 'tool',
+                content: [
+                  {
+                    type: 'tool-result',
+                    toolName: 'listFlights',
+                    toolCallId,
+                    result: flights
+                  }
+                ]
+              }
+            ]
+          })
+
+          return (
+            <BotCard>
+              <Flights props={flights} />
+            </BotCard>
+          )
+        }
+      },
       listStocks: {
         description: 'List three imaginary stocks that are trending.',
         parameters: z.object({
