@@ -15,9 +15,10 @@ import {
   BotCard,
   BotMessage,
   SystemMessage,
-  Stock,
-  Purchase
+  Stock
 } from '@/components/stocks'
+
+import { Purchase } from '@/components/travel/flight-purchase'
 
 import { z } from 'zod'
 import { EventsSkeleton } from '@/components/stocks/events-skeleton'
@@ -38,7 +39,7 @@ import { SpinnerMessage, UserMessage } from '@/components/stocks/message'
 import { Chat, Message } from '@/lib/types'
 import { auth } from '@/auth'
 
-async function confirmPurchase(symbol: string, price: number, amount: number) {
+async function confirmPurchase(airline: string, ticketPrice: number, flightNumber: string, departureAirport: string, destinationAirport: string) {
   'use server'
 
   const aiState = getMutableAIState<typeof AI>()
@@ -47,7 +48,7 @@ async function confirmPurchase(symbol: string, price: number, amount: number) {
     <div className="inline-flex items-start gap-1 md:items-center">
       {spinner}
       <p className="mb-2">
-        Purchasing {amount} ${symbol}...
+        Purchasing ticket {airline} for ${flightNumber}...
       </p>
     </div>
   )
@@ -61,7 +62,8 @@ async function confirmPurchase(symbol: string, price: number, amount: number) {
       <div className="inline-flex items-start gap-1 md:items-center">
         {spinner}
         <p className="mb-2">
-          Purchasing {amount} ${symbol}... working on it...
+        Purchasing ticket {airline} for ${flightNumber}...
+        working on it...
         </p>
       </div>
     )
@@ -71,16 +73,22 @@ async function confirmPurchase(symbol: string, price: number, amount: number) {
     purchasing.done(
       <div>
         <p className="mb-2">
-          You have successfully purchased {amount} ${symbol}. Total cost:{' '}
-          {formatNumber(amount * price)}
+          You have successfully purchased your ticket with {airline}.
+          <div className='flex'>
+            <div>
+              Total cost:
+            </div>
+            <div className='font-bold'>
+              ${ticketPrice.toFixed(2)}
+            </div>
+          </div>
         </p>
       </div>
     )
 
     systemMessage.done(
       <SystemMessage>
-        You have purchased {amount} shares of {symbol} at ${price}. Total cost ={' '}
-        {formatNumber(amount * price)}.
+          You have successfully purchased your ticket with {airline}. Total cost:{' $'}{ticketPrice.toFixed(2)}
       </SystemMessage>
     )
 
@@ -91,9 +99,7 @@ async function confirmPurchase(symbol: string, price: number, amount: number) {
         {
           id: nanoid(),
           role: 'system',
-          content: `[User has purchased ${amount} shares of ${symbol} at ${price}. Total cost = ${
-            amount * price
-          }]`
+          content: `[User has purchased a ticket from ${departureAirport} to ${destinationAirport} for a price of ${ticketPrice} ]`
         }
       ]
     })
@@ -132,23 +138,18 @@ async function submitUserMessage(content: string) {
     model: openai('gpt-3.5-turbo'),
     initial: <SpinnerMessage />,
     system: `\
-    You are a stock trading conversation bot, and a travel planning assistant.
-    You and the user can discuss stock prices or travel planes by plane and the user can adjust the amount of stocks they want to buy, or place an order, in the UI or list their flights, purchase a ticket, get regulation on what to bring to a country, or get info on related services like travel-insurance or rental car. 
+    You are a travel planning and flight booking assistant.
+    You and the user can discuss international flights and travel. The user can look for flights, get destination information, purchase a plane ticket in the UI or list their flights, purchase a ticket or get info on related services like travel-insurance or rental car. 
     
     Messages inside [] means that it's a UI element or a user event. For example:
-    - "[Price of AAPL = 100]" means that an interface of the stock price of AAPL is shown to the user.
-    - "[User has changed the amount of AAPL to 10]" means that the user has changed the amount of AAPL to 10 in the UI.
     - "[Date of flight = 01.12.2024 ]" means that an interface of the flight data of the users flight is shown.
     - "[User has changed the date to 12.02.2025]" means that the user has changed the date of his flight to 12.02.2025 in the UI.
 
 
     
-    If the user requests purchasing a stock, call \`show_stock_purchase_ui\` to show the purchase UI.
-    If the user just wants the price, call \`show_stock_price\` to show the price.
-    If you want to show trending stocks, call \`list_stocks\`.
-    If you want to show events, call \`get_events\`.
-    If the user requests to lists his flights, call \`list_flights\`.
-    If the user wants to sell stock, or complete another impossible task, respond that you are a demo and cannot do that.
+    If the user requests to list available flights, call \`list_flights\`. 
+    If the user selected a specific flight, show that flight information and call \`purchase_flight\`. 
+    If the user wants you to perform an impossible task that is not covered by the tools respond that you are a demo and cannot do that.
     
     Besides that, you can also chat with users and do some calculations if needed.`,
     messages: [
@@ -245,6 +246,73 @@ async function submitUserMessage(content: string) {
               <Flights props={flights} />
             </BotCard>
           )
+        }
+      },
+      showFlightPurchase: {
+        description:
+          'Show price and the UI to purchase the ticket for the previously selected flight. Also show the purchase button. Use this if the user wants to purchase a flight ticket.',
+        parameters: z.object({
+          airline: z
+            .string()
+            .describe(
+              'The name of the airline that was selected prior.'
+            ),
+          ticketPrice: z.number().describe('The price of the flight ticket as selected prior.'),
+          flightNumber: z.string().describe('The flight number for the selected ticket.'),
+          departureAirport: z.string().describe('The airport where the selcted flights departs.'),
+          destinationAirport: z.string().describe('The airport where the selected flight lands.'),
+          
+        }),
+        generate: async function* ({ airline, ticketPrice, flightNumber, departureAirport, destinationAirport }) {
+          const toolCallId = nanoid()
+
+            aiState.done({
+              ...aiState.get(),
+              messages: [
+                ...aiState.get().messages,
+                {
+                  id: nanoid(),
+                  role: 'assistant',
+                  content: [
+                    {
+                      type: 'tool-call',
+                      toolName: 'showFlightPurchase',
+                      toolCallId,
+                      args: { airline, ticketPrice, flightNumber, departureAirport, destinationAirport }
+                    }
+                  ]
+                },
+                {
+                  id: nanoid(),
+                  role: 'tool',
+                  content: [
+                    {
+                      type: 'tool-result',
+                      toolName: 'showFlightPurchase',
+                      toolCallId,
+                      result: {
+                        airline, ticketPrice, flightNumber, departureAirport, destinationAirport
+                      }
+                    }
+                  ]
+                }
+              ]
+            })
+
+            return (
+              <BotCard>
+                <Purchase
+                  props={{
+                    airline,
+                    ticketPrice,
+                    flightNumber,
+                    departureAirport,
+                    destinationAirport,
+                    status: 'requires_action'
+                  }}
+                />
+              </BotCard>
+            )
         }
       },
       listStocks: {

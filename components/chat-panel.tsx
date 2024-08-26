@@ -36,14 +36,14 @@ export function ChatPanel({
 
   const exampleMessages = [
     {
-      heading: 'What are possible flights',
-      subheading: 'from the Gold Coast to Austria?',
+      heading: 'Look for flights and buy your ticket',
+      subheading: 'from the Gold Coast to Austria',
       message: `What are the available flights from the Gold Coast to Vienna?`
     },
     {
-      heading: 'I would like to buy a ticket',
-      subheading: 'from the Gold Coast to Europe',
-      message: `I would like to buy a ticket from the Gold Coast to Vienna`
+      heading: 'Find my flight with my flight number',
+      subheading: 'for my flight QF3459',
+      message: `Find the flight with the flight-number QF3459`
     },
   ]
 
