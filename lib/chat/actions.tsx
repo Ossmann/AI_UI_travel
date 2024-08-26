@@ -185,7 +185,7 @@ async function submitUserMessage(content: string) {
     },
     tools: {
       listFlights: {
-        description: 'List three imaginary flights from Gold Coast OOL to Vienna VIE.',
+        description: 'List three imaginary flights from the city that that the user is interested to a destination airport city around the world.',
         parameters: z.object({
           flights: z.array(
             z.object({
