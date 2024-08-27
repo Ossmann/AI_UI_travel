@@ -321,7 +321,7 @@ async function submitUserMessage(content: string) {
       },
       listFlightSchemas: {
         description:
-          'Make up details for 5 imaginary flightSchemas on 5 different dates for a flight number that the user provides you to get details. Make up these values for those variables defined in the flightSchemas object.',
+          'Make up details for 5 imaginary flightSchemas on 5 different dates for a flight number that the user provides you to get details. Make up these values for those variables defined in the flightSchemas object. Make one flight status Cancelled',
         parameters: z.object({
           flightSchema: z.array(
             z.object({
