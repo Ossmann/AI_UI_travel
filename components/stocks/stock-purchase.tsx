@@ -13,7 +13,7 @@ interface Purchase {
   status: 'requires_action' | 'completed' | 'expired'
 }
 
-export function Purchase({
+export function StockPurchase({
   props: { numberOfShares, symbol, price, status = 'expired' }
 }: {
   props: Purchase

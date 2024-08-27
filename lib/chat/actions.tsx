@@ -20,7 +20,9 @@ import {
 
 import { Purchase } from '@/components/travel/flight-purchase'
 
-import { z } from 'zod'
+import { StockPurchase } from '@/components/stocks/stock-purchase'
+
+import { z } from 'zod';
 import { EventsSkeleton } from '@/components/stocks/events-skeleton'
 import { Events } from '@/components/stocks/events'
 import { StocksSkeleton } from '@/components/stocks/stocks-skeleton'
@@ -611,7 +613,7 @@ async function submitUserMessage(content: string) {
 
             return (
               <BotCard>
-                <Purchase
+                <StockPurchase
                   props={{
                     numberOfShares,
                     symbol,
