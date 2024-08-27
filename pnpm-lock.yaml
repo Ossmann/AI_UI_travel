@@ -69,7 +69,7 @@ dependencies:
     specifier: ^5.0.7
     version: 5.0.7
   next:
-    specifier: 14.2.6
+    specifier: ^14.2.6
     version: 14.2.6(react-dom@18.3.1)(react@18.3.1)
   next-auth:
     specifier: 5.0.0-beta.4
