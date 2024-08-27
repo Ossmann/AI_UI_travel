@@ -14,7 +14,7 @@ const Stock = dynamic(() => import('./stock').then(mod => mod.Stock), {
 })
 
 const Purchase = dynamic(
-  () => import('./stock-purchase').then(mod => mod.Purchase),
+  () => import('./stock-purchase').then(mod => mod.StockPurchase),
   {
     ssr: false,
     loading: () => (
