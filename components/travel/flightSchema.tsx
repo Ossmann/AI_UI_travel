@@ -4,75 +4,32 @@ import { useState } from 'react';
 import { FaPlane } from 'react-icons/fa';
 
 interface FlightInfo {
-  date: string;
-  flightNumber: string;
-  from: string;
-  to: string;
-  departureTime: string;
-  arrivalTime: string;
-  terminalFrom: string;
-  terminalTo: string;
-  gate: string;
-  progress: number; // Value from 0 to 1 indicating flight progress
-  duration: string; // Duration of the flight
-  status: 'On time' | 'Delayed' | 'Cancelled'; // Status of the flight
-}
+    date: string;
+    flightNumber: string;
+    from: string;
+    to: string;
+    departureTime: string;
+    arrivalTime: string;
+    terminalFrom: string;
+    terminalTo: string;
+    gate: string;
+    progress: number; // Value from 0 to 1 indicating flight progress
+    duration: string; // Duration of the flight
+    status: 'On time' | 'Delayed' | 'Cancelled'; // Status of the flight
+  }
 
-const flightsData: FlightInfo[] = [
-  {
-    date: 'Mo., 26. Aug.',
-    flightNumber: 'QF 5401',
-    from: 'OOL',
-    to: 'SYD',
-    departureTime: '6:00 AM',
-    arrivalTime: '7:25 AM',
-    terminalFrom: '1',
-    terminalTo: '2',
-    gate: '8',
-    progress: 0.25, // 1/4th of the way
-    duration: '1 Std., 25 Min.',
-    status: 'On time',
-  },
-  {
-    date: 'Mi., 28. Aug.',
-    flightNumber: 'QF 5401',
-    from: 'OOL',
-    to: 'SYD',
-    departureTime: '6:05 AM',
-    arrivalTime: '7:30 AM',
-    terminalFrom: '1',
-    terminalTo: '2',
-    gate: '8',
-    progress: 0.50, // 1/2 of the way
-    duration: '1 Std., 25 Min.',
-    status: 'Delayed',
-  },
-  {
-    date: 'Do., 29. Aug.',
-    flightNumber: 'QF 5401',
-    from: 'OOL',
-    to: 'SYD',
-    departureTime: '6:10 AM',
-    arrivalTime: '7:35 AM',
-    terminalFrom: '1',
-    terminalTo: '2',
-    gate: '8',
-    progress: 0.75, // 3/4th of the way
-    duration: '1 Std., 25 Min.',
-    status: 'Cancelled',
-  },
-];
 
-export default function FlightDetails() {
+export function FlightSchema({ props: flightSchemas }: { props: FlightInfo[] }) {
+
   const [selectedFlightIndex, setSelectedFlightIndex] = useState(1);
 
-  const selectedFlight = flightsData[selectedFlightIndex];
-  const progressPercentage = selectedFlight.progress * 100;
+  const selectedFlight = flightSchemas[selectedFlightIndex];
+  const progressPercentage = selectedFlight?.progress ? selectedFlight.progress * 100 : 0;
 
   return (
     <div className="p-4 max-w-lg mx-auto text-sm">
         <div className="flex space-x-4 mb-4">
-            {flightsData.map((flight, index) => (
+            {flightSchemas.map((flight, index) => (
             <button
                 key={index}
                 className={`px-4 py-2 text ${

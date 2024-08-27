@@ -28,6 +28,9 @@ import { Stocks } from '@/components/stocks/stocks'
 import { StockSkeleton } from '@/components/stocks/stock-skeleton'
 import { FlightsSkeleton } from '@/components/travel/flights-skeleton'
 import { Flights } from '@/components/travel/flights'
+import FlightsSchemaSkeleton from '@/components/travel/flightSchemas-skeleton'
+import { FlightSchema } from '@/components/travel/flightSchema'
+
 import {
   formatNumber,
   runAsyncFnWithoutBlocking,
@@ -139,7 +142,7 @@ async function submitUserMessage(content: string) {
     initial: <SpinnerMessage />,
     system: `\
     You are a travel planning and flight booking assistant.
-    You and the user can discuss international flights and travel. The user can look for flights, get destination information, purchase a plane ticket in the UI or list their flights, purchase a ticket or get info on related services like travel-insurance or rental car. 
+    You and the user can discuss international flights and travel. The user can look for flights, get destination information, purchase a plane ticket in the UI or list flights for flight numbers.
     
     Messages inside [] means that it's a UI element or a user event. For example:
     - "[Date of flight = 01.12.2024 ]" means that an interface of the flight data of the users flight is shown.
@@ -148,7 +151,8 @@ async function submitUserMessage(content: string) {
 
     
     If the user requests to list available flights, call \`list_flights\`. 
-    If the user selected a specific flight, show that flight information and call \`purchase_flight\`. 
+    If the user selected a specific flight, show that flight information and call \`purchase_flight\`.
+    If the user requests to see detailed flight information for a flight number call \`list_flight_schemas\`.
     If the user wants you to perform an impossible task that is not covered by the tools respond that you are a demo and cannot do that.
     
     Besides that, you can also chat with users and do some calculations if needed.`,
@@ -313,6 +317,76 @@ async function submitUserMessage(content: string) {
                 />
               </BotCard>
             )
+        }
+      },
+      listFlightSchemas: {
+        description:
+          'Make up details for 5 imaginary flightSchemas on 5 different dates for a flight number that the user provides you to get details. Make up these values for those variables defined in the flightSchemas object.',
+        parameters: z.object({
+          flightSchema: z.array(
+            z.object({
+              date: z.string().describe('The made up date for the fictional flight number, for example Mo., 26. Aug.'),
+              terminalFrom: z.string().describe('The airport terminal where the flight departs from, e.g., Terminal 1'),
+              terminalTo: z.string().describe('The airport terminal where the flight arrives, e.g., Terminal 2'),
+              flightNumber: z.string().describe('The flight number, e.g., QF 5401'),
+              from: z.string().describe('The IATA code of the departure airport, e.g., OOL for Gold Coast Airport'),
+              to: z.string().describe('The IATA code of the arrival airport, e.g., SYD for Sydney Airport'),
+              departureTime: z.string().describe('The scheduled departure time of the flight, e.g., 6:00 AM'),
+              arrivalTime: z.string().describe('The scheduled arrival time of the flight, e.g., 7:25 AM'),
+              gate: z.string().describe('The gate number from which the flight departs, e.g., Gate 8'),
+              progress: z.number().min(0).max(1).describe('The progress of the flight as a number between 0 and 1, where 0 means the flight has not started and 1 means the flight has completed'),
+              duration: z.string().describe('The total duration of the flight, e.g., 1 Std., 25 Min.'),
+              status: z.enum(['On time', 'Delayed', 'Cancelled']).describe('The current status of the flight, which can be "On time", "Delayed", or "Cancelled"'),
+            })
+          )
+        }),
+        generate: async function* ({ flightSchema }) {
+          yield (
+            <BotCard>
+              <FlightsSchemaSkeleton />
+            </BotCard>
+          )
+
+          await sleep(1000)
+
+          const toolCallId = nanoid()
+
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'assistant',
+                content: [
+                  {
+                    type: 'tool-call',
+                    toolName: 'listFlightSchemas',
+                    toolCallId,
+                    args: { flightSchema }
+                  }
+                ]
+              },
+              {
+                id: nanoid(),
+                role: 'tool',
+                content: [
+                  {
+                    type: 'tool-result',
+                    toolName: 'listFlightSchemas',
+                    toolCallId,
+                    result: flightSchema
+                  }
+                ]
+              }
+            ]
+          })
+
+          return (
+            <BotCard>
+              <FlightSchema props={flightSchema} />
+            </BotCard>
+          )
         }
       },
       listStocks: {
