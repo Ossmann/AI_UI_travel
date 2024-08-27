@@ -3,6 +3,7 @@
 import { useId, useState } from 'react'
 import { useActions, useAIState, useUIState } from 'ai/rsc'
 import { formatNumber } from '@/lib/utils'
+import { TicketIcon } from '@heroicons/react/24/solid'
 
 import type { AI } from '@/lib/chat/actions'
 
@@ -28,34 +29,38 @@ export function Purchase({
 
 
   return (
-    <div className="">
-        <div className="" style={{ width: '60px', height: '60px' }}>
-            <img
+    <div className='w-3/4'>
+          <div className="grid grid-cols-5 items-center gap-4 p-4 border-2 border-gray-300 shadow-lg bg-gray-400/20 rounded-lg">
+            <div className=" w-3/4 rounded-full bg-white p-2">
+              <img
                 src="/quantas_logo.png"
+                width={32}
+                height={32}
                 alt="Airline Logo"
-                className=""
-            />
-        </div>
-        <div className="">
-            <div className="">
-                <div className="">{airline}</div>
-                <div className="">{flightNumber}</div>
+                className="object-contain"
+                style={{ aspectRatio: "32/32", objectFit: "cover" }}
+              />
             </div>
-            <div className="">
-                <div>{departureAirport}</div>
-                <div>{destinationAirport}</div>
+            <div className="font-bold text-lg text-gray-800">{airline}</div>
+            <div className="text-gray-500">{flightNumber}</div>
+            <div></div>
+            <div className="w-14 row-span-2">
+              <TicketIcon />
             </div>
-        </div>
-        <div className="">
-            ${ticketPrice.toFixed(2)}
-        </div>
-
+            <div></div>
+            <div className="col-span-2 -mt-8 text-gray-800">
+              {departureAirport} - {destinationAirport}
+            </div>
+            <div className="text-gray-800 overflow-hidden col-start-2">${ticketPrice.toFixed(2)}</div>
+            <div></div>
+            </div>
       {purchasingUI ? (
         <div className="mt-4 text-zinc-200">{purchasingUI}</div>
       ) : status === 'requires_action' ? (
         <>
+        <div className='text-center'>
           <button
-            className="w-full px-4 py-2 mt-6 font-bold bg-green-400 rounded-lg text-zinc-900 hover:bg-green-500"
+            className="w-full px-4 py-2 mt-6 font-bold bg-green-400 rounded-lg text-zinc-900 hover:bg-green-500 w-1/3"
             onClick={async () => {
               const response = await confirmPurchase(airline, ticketPrice, flightNumber, departureAirport, destinationAirport)
               setPurchasingUI(response.purchasingUI)
@@ -69,6 +74,7 @@ export function Purchase({
           >
             Purchase
           </button>
+        </div>
         </>
       ) : status === 'completed' ? (
         <p className="mb-2 text-white">

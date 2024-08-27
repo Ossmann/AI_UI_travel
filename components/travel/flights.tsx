@@ -50,7 +50,7 @@ export function Flights({ props: flights }: { props: Flight[] }) {
                 >
                 
                     <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 p-4 border-2 border-indigo-800 shadow-lg bg-indigo-800 rounded-lg hover:border-indigo-400 hover:transform hover:translate-x-2 hover:translate-y-2 hover:scale-105 transition-transform duration-200 ease-in-out cursor-pointer">                        
-                        <div className="flex items-center justify-center rounded-full bg-muted p-2">
+                        <div className="flex items-center justify-center rounded-full bg-white p-2">
                             <img
                                 src="/quantas_logo.png"
                                 width={32}
