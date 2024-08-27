@@ -154,6 +154,7 @@ async function submitUserMessage(content: string) {
     
     If the user requests to list available flights, call \`list_flights\`. 
     If the user selected a specific flight, show that flight information and call \`purchase_flight\`.
+    Do not call \`list_flight_schemas\` when the user selected a specific flight to purchase a ticket.
     If the user requests to see detailed flight information for a flight number call \`list_flight_schemas\`.
     If the user wants you to perform an impossible task that is not covered by the tools respond that you are a demo and cannot do that.
     
@@ -196,6 +197,7 @@ async function submitUserMessage(content: string) {
         parameters: z.object({
           flights: z.array(
             z.object({
+              flightId: z.number().describe('A unique id number for a flight'),
               airportCodeDeparture: z.string().describe('The airport where the flight departs, for example OOL'),
               airportCodeArrival: z.string().describe('The airport where the flight departs, for example OOL'),
               price: z.number().describe('The price of the flight'),

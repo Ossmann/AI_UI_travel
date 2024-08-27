@@ -6,6 +6,7 @@ import { PaperPlaneIcon } from '@radix-ui/react-icons';
 import type { AI } from '@/lib/chat/actions'
 
 interface Flight {
+    flightId: number;
     airportCodeDeparture: string;
     airportCodeArrival: string;
     flightNumber: string;
@@ -41,10 +42,10 @@ export function Flights({ props: flights }: { props: Flight[] }) {
         <div className="grid gap-5">
             {flights.map((flight) => (
                 <button
-                    key={flight.flightNumber} className="w-full max-w-md"
+                    key={flight.flightId} className="w-full max-w-md"
                         
                     onClick={async () => {
-                    const response = await submitUserMessage(`View ${flight.flightNumber}`)
+                    const response = await submitUserMessage(`View ${flight.flightId}`)
                     setMessages(currentMessages => [...currentMessages, response])
                     }}
                 >

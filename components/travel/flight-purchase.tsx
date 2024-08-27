@@ -30,7 +30,7 @@ export function Purchase({
 
   return (
     <div className='w-3/4'>
-          <div className="grid grid-cols-5 items-center gap-4 p-4 border-2 border-gray-300 shadow-lg bg-gray-400/20 rounded-lg">
+          <div className="grid grid-cols-5 items-center gap-4 p-4 border-2 border-gray-400 shadow-lg bg-gray-400/20 rounded-lg border-dashed">
             <div className=" w-3/4 rounded-full bg-white p-2">
               <img
                 src="/quantas_logo.png"
@@ -55,12 +55,12 @@ export function Purchase({
             <div></div>
             </div>
       {purchasingUI ? (
-        <div className="mt-4 text-zinc-200">{purchasingUI}</div>
+        <div className="mt-4 text-gray-600">{purchasingUI}</div>
       ) : status === 'requires_action' ? (
         <>
-        <div className='text-center'>
+        <div className=' w-full flex justify-center'>
           <button
-            className="w-full px-4 py-2 mt-6 font-bold bg-green-400 rounded-lg text-zinc-900 hover:bg-green-500 w-1/3"
+            className="w-1/3 px-4 py-2 mt-6 font-bold bg-green-400 rounded-lg text-zinc-900 hover:bg-green-500 w-1/3"
             onClick={async () => {
               const response = await confirmPurchase(airline, ticketPrice, flightNumber, departureAirport, destinationAirport)
               setPurchasingUI(response.purchasingUI)
@@ -77,11 +77,11 @@ export function Purchase({
         </div>
         </>
       ) : status === 'completed' ? (
-        <p className="mb-2 text-white">
+        <p className="mb-2 text-gray-700">
           You have successfully purchased your ticket for flight {flightNumber} Total cost:{ticketPrice}
         </p>
       ) : status === 'expired' ? (
-        <p className="mb-2 text-white">Your checkout session has expired!</p>
+        <p className="mb-2">Your checkout session has expired!</p>
       ) : null}
     </div>
   )
